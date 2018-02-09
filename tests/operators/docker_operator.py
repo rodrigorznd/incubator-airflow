@@ -18,7 +18,7 @@ import logging
 try:
     from airflow.operators.docker_operator import DockerOperator
     from airflow.hooks.docker_hook import DockerHook
-    from docker import Client
+    from docker.api import APIClient as Client
 except ImportError:
     pass
 

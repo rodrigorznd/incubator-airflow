@@ -19,7 +19,8 @@ from airflow.exceptions import AirflowException
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 from airflow.utils.file import TemporaryDirectory
-from docker import Client, tls
+from docker import tls
+from docker.api import APIClient as Client
 import ast
 
 
@@ -149,13 +150,13 @@ class DockerOperator(BaseOperator):
             docker_conn_id=self.docker_conn_id,
             base_url=self.docker_url,
             version=self.api_version,
-            tls=self.__get_tls_config()
+            tls=self.get_tls_config()
         )
 
     def execute(self, context):
         self.log.info('Starting docker container from image %s', self.image)
 
-        tls_config = self.__get_tls_config()
+        tls_config = self.get_tls_config()
 
         if self.docker_conn_id:
             self.cli = self.get_hook().get_conn()
@@ -222,7 +223,7 @@ class DockerOperator(BaseOperator):
             self.log.info('Stopping docker container')
             self.cli.stop(self.container['Id'])
 
-    def __get_tls_config(self):
+    def get_tls_config(self):
         tls_config = None
         if self.tls_ca_cert and self.tls_client_cert and self.tls_client_key:
             tls_config = tls.TLSConfig(
